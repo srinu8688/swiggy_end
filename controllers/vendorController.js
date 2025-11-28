@@ -57,8 +57,19 @@ const vendorLogin = async(req, res) => {
 
 const getAllVendors = async(req, res) => {
     try {
-        const vendors = await Vendor.find().populate('firm');
-        res.json({ vendors })
+        const { order } = req.query;
+        
+        // Build the query
+        let query = Vendor.find().populate('firm');
+        
+        // Add sorting if order parameter is provided
+        if (order) {
+            const sortOrder = order === 'desc' ? -1 : 1;
+            query = query.sort({ createdAt: sortOrder });
+        }
+        
+        const vendors = await query;
+        res.json({ vendors });
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: "Internal server error" });
